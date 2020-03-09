@@ -15,11 +15,8 @@ def sigmoid(x):
     Return:
     s -- sigmoid(x)
     """
-
-    ### YOUR CODE HERE (~1 Line)
-
-    ### END YOUR CODE
-
+    s = 1/(1+np.exp(-x))
+    print("HEREREEE\n\n")
     return s
 
 
@@ -61,8 +58,10 @@ def naiveSoftmaxLossAndGradient(
     ### Please use the provided softmax function (imported earlier in this file)
     ### This numerically stable implementation helps you avoid issues pertaining
     ### to integer overflow. 
-
+    pred = softmax(centerWordVec)
+    print(f'Centerwordvec shape: {centerWordVec.shape}\n')
     ### END YOUR CODE
+
 
     return loss, gradCenterVec, gradOutsideVecs
 
