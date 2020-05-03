@@ -5,3 +5,5 @@ a3/data/*
 a4/a4-venv/*
 *.pickle
 *.npy
+*/model.bin*
+a5-public/a5-venv/*
