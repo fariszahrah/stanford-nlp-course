@@ -25,6 +25,7 @@ from tqdm import tqdm
 from utils import pad_sents_char, batch_iter, read_corpus
 from vocab import Vocab, VocabEntry
 
+from cnn import CNN
 from char_decoder import CharDecoder
 from nmt_model import NMT
 
@@ -45,8 +46,8 @@ class DummyVocab():
     def __init__(self):
         self.char2id = json.load(open('./sanity_check_en_es_data/char_vocab_sanity_check.json', 'r'))
         self.id2char = {id: char for char, id in self.char2id.items()}
-        self.char_pad = self.char2id['∏']
-        self.char_unk = self.char2id['Û']
+        self.char_pad = self.char2id['<pad>']
+        self.char_unk = self.char2id['<unk>']
         self.start_of_word = self.char2id["{"]
         self.end_of_word = self.char2id["}"]
 
@@ -69,6 +70,20 @@ def question_1e_sanity_check():
 
     print("Sanity Check Passed for Question 1e: To Input Tensor Char!")
     print("-"*80)
+
+
+def question_1g_sanity_check():
+    ''' sanity check for conv layer shapes
+    '''
+    print ("-"*80)
+    print("Running sanity check for 1g: conv1d")
+    print ("-"*80)
+    sentence_length = 10
+    max_word_length = 21
+    inpt = torch.zeros( BATCH_SIZE, 100, max_word_length)  
+    model = CNN(100, 20, max_word_length)
+    output = model.forward(inpt)
+
 
 def question_1h_sanity_check(model):
     """ Sanity check for model_embeddings.py
@@ -168,9 +183,11 @@ def main():
         target_vocab=char_vocab)
 
     if args['1e']:
-        question_1e_sanity_check()
+        question_1g_sanity_check()
     elif args['1h']:
         question_1h_sanity_check(model)
+    elif args['1g']:
+        question_1g_sanity_check()
     elif args['2a']:
         question_2a_sanity_check(decoder, char_vocab)
     elif args['2b']:

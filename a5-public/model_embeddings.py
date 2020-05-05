@@ -40,6 +40,23 @@ class ModelEmbeddings(nn.Module):
 
         ### YOUR CODE HERE for part 1h
 
+
+        self.embed_size = word_embed_size
+        self.vocab = vocab
+        self.char_embed_size = 50
+        self.max_word_len = 21
+        self.dropout_rate = 0.2
+
+        self.char_embedding  = nn.Embedding(
+            num_embeddings =len(vocab.char2id),
+            embedding_dim  =self.char_embed_size,
+            padding_idx    =vocab.char2id['<pad>'],
+
+        )
+        self.CNN = CNN(self.char_embed_size,self.embed_size,self.max_word_len)
+        self.Highway = Highway(self.embed_size)
+        self.dropout = nn.Dropout(self.dropout_rate)
+
         ### END YOUR CODE
 
     def forward(self, input):
@@ -51,7 +68,17 @@ class ModelEmbeddings(nn.Module):
         @param output: Tensor of shape (sentence_length, batch_size, word_embed_size), containing the
             CNN-based embeddings for each word of the sentences in the batch
         """
-        ### YOUR CODE HERE for part 1h
 
-        ### END YOUR CODE
+        print('input.size: ', input.size())
+        char_embeddings = self.char_embedding(input) # sentence_length, batch_size, max_word_length,
+        sent_len, batch_size, max_word, _ = char_embeddings.shape
+        view_shape = (sent_len * batch_size, max_word, self.char_embed_size)
+        # bb = sent_len * batch_size
+        # bb, char_embed, max_word because 1D CNN only convolve in last dimension
+        char_embeddings = char_embeddings.view(view_shape).transpose(1, 2)
 
+        x_conv    = self.CNN(char_embeddings) # bb, word_embed_size
+        x_highway = self.Highway(x_conv)
+        output    = self.dropout(x_highway) # bb, word_embed
+        output    = output.view(sent_len, batch_size, self.embed_size)
+        return output

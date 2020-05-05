@@ -127,7 +127,7 @@ def train(args: Dict):
 
     vocab = Vocab.load(args['--vocab'])
 
-    model = NMT(word_embed_size=int(args['--word-embed-size']),
+    model = NMT(embed_size=int(args['--word-embed-size']),
                 hidden_size=int(args['--hidden-size']),
                 dropout_rate=float(args['--dropout']),
                 vocab=vocab, no_char_decoder=args['--no-char-decoder'])
