@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-CS224N 2018-19: Homework 5
-nmt.py: NMT Model
+CS224N 2019-20: Homework 5
+utils.py:
 Pencheng Yin <pcyin@cs.cmu.edu>
 Sahil Chopra <schopra8@stanford.edu>
 """
@@ -15,42 +15,38 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import nltk
+nltk.download('punkt')
 
 def pad_sents_char(sents, char_pad_token):
-    """ Pad list of sentences according to the longest sentence in the batch and max_word_length.
-    @param sents (list[list[list[int]]]): list of sentences, result of `words2charindices()` 
+    """ Pad list of sentences according to the longest sentence in the batch and longest words in all sentences.
+    @param sents (list[list[list[int]]]): list of sentences, result of `words2charindices()`
         from `vocab.py`
     @param char_pad_token (int): index of the character-padding token
     @returns sents_padded (list[list[list[int]]]): list of sentences where sentences/words shorter
         than the max length sentence/word are padded out with the appropriate pad token, such that
-        each sentence in the batch now has same number of words and each word has an equal 
+        each sentence in the batch now has same number of words and each word has an equal
         number of characters
         Output shape: (batch_size, max_sentence_length, max_word_length)
     """
-    # Words longer than 21 characters should be truncated
-    max_word_length = 21 
-    max_sentence_length = max([len(s) for s in sents]) # len
-    ### YOUR CODE HERE for part 1f
-    ### TODO:
-    ###     Perform necessary padding to the sentences in the batch similar to the pad_sents() 
-    ###     method below using the padding character from the arguments. You should ensure all 
-    ###     sentences have the same number of words and each word has the same number of 
-    ###     characters. 
-    ###     Set padding words to a `max_word_length` sized vector of padding characters.  
-    ###
-    ###     You should NOT use the method `pad_sents()` below because of the way it handles 
-    ###     padding and unknown words.
-    def sent_to_vec(sent):
-        # sent: list[list[int]] list of word, each word is a list of int
+
+    sents_padded = []
+    max_word_length = max(len(w) for s in sents for w in s )
+    max_sent_len = max(len(s) for s in sents)
+    batch_size = len(sents)
+
+    for k in range(batch_size):
+        sentence = sents[k]
         sent_padded = []
-        for word in sent[:max_sentence_length]:
-            word_padded = word[:max_word_length]
-            word_padded = word_padded + [char_pad_token] * (max_word_length - len(word_padded))
-            sent_padded.append(word_padded)
-        # pad sentence to have same number of word
-        sent_padded += [[char_pad_token] * max_word_length] * (max_sentence_length - len(sent_padded))
-        return sent_padded
-    sents_padded = [sent_to_vec(i) for i in sents]
+
+        for w in sentence:
+            data = [c for c in w] + [char_pad_token for _ in range(max_word_length-len(w))]
+            if len(data) > max_word_length:
+                data = data[:max_word_length]
+            sent_padded.append(data)
+
+        sent_padded = sent_padded[:max_sent_len] + [[char_pad_token]*max_word_length] * max(0, max_sent_len - len(sent_padded))
+        sents_padded.append(sent_padded)
 
     return sents_padded
 
@@ -67,13 +63,17 @@ def pad_sents(sents, pad_token):
     """
     sents_padded = []
 
+    ### COPY OVER YOUR CODE FROM ASSIGNMENT 4
     max_len = max(len(s) for s in sents)
     batch_size = len(sents)
 
     for s in sents:
         padded = [pad_token] * max_len
-        padded[:len(s)] = s
+        padded[:len(s)] = s 
         sents_padded.append(padded)
+
+
+    ### END YOUR CODE FROM ASSIGNMENT 4
 
     return sents_padded
 
@@ -87,14 +87,13 @@ def read_corpus(file_path, source):
     """
     data = []
     for line in open(file_path):
-        sent = line.strip().split(' ')
+        sent = nltk.word_tokenize(line)
         # only append <s> and </s> to the target sentence
         if source == 'tgt':
             sent = ['<s>'] + sent + ['</s>']
         data.append(sent)
 
     return data
-
 
 def batch_iter(data, batch_size, shuffle=False):
     """ Yield batches of source and target sentences reverse sorted by length (largest to smallest).

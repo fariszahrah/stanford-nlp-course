@@ -31,7 +31,6 @@ class NMT(nn.Module):
     """
     def __init__(self, embed_size, hidden_size, vocab, dropout_rate=0.2, no_char_decoder=False):
         """ Init NMT Model.
-
         @param embed_size (int): Embedding size (dimensionality)
         @param hidden_size (int): Hidden Size (dimensionality)
         @param vocab (VocabEntry): Vocabulary object containing src and tgt languages
@@ -65,10 +64,8 @@ class NMT(nn.Module):
     def forward(self, source: List[List[str]], target: List[List[str]]) -> torch.Tensor:
         """ Take a mini-batch of source and target sentences, compute the log-likelihood of
         target sentences under the language models learned by the NMT system.
-
         @param source (List[List[str]]): list of source sentence tokens
         @param target (List[List[str]]): list of target sentence tokens, wrapped by `<s>` and `</s>`
-
         @returns scores (Tensor): a variable/tensor of shape (b, ) representing the
                                     log-likelihood of generating the gold-standard target sentence for
                                     each example in the input batch. Here b = batch size.
@@ -249,7 +246,6 @@ class NMT(nn.Module):
 
     def generate_sent_masks(self, enc_hiddens: torch.Tensor, source_lengths: List[int]) -> torch.Tensor:
         """ Generate sentence masks for encoder hidden states.
-
         @param enc_hiddens (Tensor): encodings of shape (b, src_len, 2*h), where b = batch size,
                                      src_len = max source length, h = hidden size. 
         @param source_lengths (List[int]): List of actual lengths for each of the sentences in the batch.

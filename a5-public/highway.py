@@ -14,14 +14,14 @@ class Highway(nn.Module):
     Highway module which takes a tensor from the convolution layer and outputs a word embedding tensor (by batch)
     '''
 
-    def __init__(self, embed_size):
+    def __init__(self, word_embed_size):
         '''
         init highway Module 
         @param embed_size(int) : Embedding size (dimensionality)
         '''
 
         super(Highway, self).__init__()
-        self.embed_size = embed_size
+        self.embed_size = word_embed_size
         self.proj = nn.Linear(self.embed_size, self.embed_size)
         self.gate = nn.Linear(self.embed_size, self.embed_size)
 
@@ -31,7 +31,7 @@ class Highway(nn.Module):
         @param conv_out(Tensor) : Tensor of convolution layer output of size embed_size 
         @returns x_highway(Tensor) : word embedding tensor of size batch_size
         '''
-        x_proj = F.relu(self.proj(conv_out))
+        x_proj = F.relu_(self.proj(conv_out))
         x_gate = F.sigmoid(self.gate(conv_out))
 
         x_highway = (x_proj * x_gate + (1 - x_gate) * conv_out)

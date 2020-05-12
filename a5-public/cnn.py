@@ -4,7 +4,6 @@
 """
 CS224N 2019-20: Homework 5
 """
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -20,10 +19,12 @@ class CNN(nn.Module):
 
         '''
         super(CNN, self).__init__()
-        self.out_channels = out_channels
         self.embed_size = embed_size
-        self.conv1 = nn.Conv1d(embed_size, out_channels, kernel_size, padding=padding )
-        self.pool = nn.MaxPool1d(word_len - kernel_size + 1)
+        self.out_channels = out_channels
+        self.conv1 = nn.Conv1d(embed_size, out_channels, kernel_size, padding=padding) 
+        self.pool = nn.MaxPool1d(word_len - kernel_size + 1 + (2*padding))
+
+
     def forward(self, x_reshaped: torch.Tensor) -> torch.Tensor:
         '''
         pass character embeddings through Conv1d layer,relu, and maxpool
@@ -33,10 +34,11 @@ class CNN(nn.Module):
         print('Embedding size: ', self.embed_size)
         print('X_reshaped size: ',x_reshaped.size())
         x = self.conv1(x_reshaped)
-        x = F.relu(x)
+        x = F.relu_(x)
         print('x_size after conv with out_channels: ',self.out_channels, ',  ',x.size())
         #x = nn.ReLU(x)
         x_conv = self.pool(x).squeeze()
         print('x_conv_size: ', x_conv.size())
         
         return x_conv
+
